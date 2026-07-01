@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { DomainValidationError } from '../src/domain/domain-errors.js';
 import { toDelivery, toMongoDeliveryDocument } from '../src/infrastructure/mongodb/mongo-delivery-mapper.js';
 import { deliveryFixture, documentFixture } from './support/delivery-fixtures.js';
 
@@ -41,5 +42,58 @@ describe('mongo delivery mapper', () => {
     const delivery = toDelivery(documentFixture());
 
     expect(delivery).toEqual(deliveryFixture());
+  });
+
+  it('rejects Mongo documents with unsupported provider or status values', () => {
+    expect(() =>
+      toDelivery(
+        documentFixture({
+          provider: {
+            code: 'DHL' as never,
+            deliveryId: 'dhl_DEMO-NRW-002',
+          },
+        }),
+      ),
+    ).toThrow(DomainValidationError);
+
+    expect(() =>
+      toDelivery(
+        documentFixture({
+          status: 'lost' as never,
+        }),
+      ),
+    ).toThrow(DomainValidationError);
+  });
+
+  it('rejects Mongo documents with invalid label, provider id or timestamps', () => {
+    expect(() =>
+      toDelivery(
+        documentFixture({
+          label: {
+            format: 'pdf' as never,
+            content: 'Printable label',
+          },
+        }),
+      ),
+    ).toThrow(DomainValidationError);
+
+    expect(() =>
+      toDelivery(
+        documentFixture({
+          provider: {
+            code: 'NRW',
+            deliveryId: '   ',
+          },
+        }),
+      ),
+    ).toThrow(DomainValidationError);
+
+    expect(() =>
+      toDelivery(
+        documentFixture({
+          statusUpdatedAt: new Date('invalid-date'),
+        }),
+      ),
+    ).toThrow(DomainValidationError);
   });
 });

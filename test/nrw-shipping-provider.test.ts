@@ -28,6 +28,34 @@ describe('NrwShippingProvider polling', () => {
     });
   });
 
+  it('returns a simulated status change for an in-transit delivery', async () => {
+    const provider = new NrwShippingProvider();
+
+    await expect(
+      provider.pollStatus({
+        providerDeliveryId: 'nrw_DEMO-NRW-002',
+        currentStatus: 'in_transit',
+      }),
+    ).resolves.toEqual({
+      kind: 'changed',
+      externalStatus: 'DELIVERED',
+      status: 'delivered',
+    });
+  });
+
+  it('does not advance a terminal delivery', async () => {
+    const provider = new NrwShippingProvider();
+
+    await expect(
+      provider.pollStatus({
+        providerDeliveryId: 'nrw_DEMO-NRW-002',
+        currentStatus: 'delivered',
+      }),
+    ).resolves.toEqual({
+      kind: 'unchanged',
+    });
+  });
+
   it('can simulate no changes', async () => {
     const provider = new NrwShippingProvider();
 

@@ -164,6 +164,29 @@ Decisiones y limites del slice:
 - `POST /deliveries` mantiene su contrato publico.
 - `GET /deliveries/:id/status` mantiene su contrato publico.
 
+## Slice 7: hardening de tests, dominio y mappers
+
+La IA se uso como apoyo para revisar gaps de cobertura despues de los flujos
+funcionales y agregar tests pequenos de hardening:
+
+- contratos directos de dominio para creacion de delivery, shipment details,
+  provider, label y status;
+- casos invalidos del mapper Mongo para evitar documentos corruptos en el borde
+  de infraestructura;
+- comportamiento adicional del mock NRW para avance a `delivered` y deliveries
+  terminales sin cambios.
+
+Decisiones y limites del slice:
+
+- No se agregaron endpoints nuevos.
+- No se cambio ningun contrato publico.
+- No se agrego historial de status.
+- No se agrego idempotencia.
+- No se agrego autenticacion ni firma de webhooks.
+- No se refactorizo la arquitectura.
+- La validacion final queda a cargo del desarrollador mediante `npm test` y
+  `npm run typecheck`.
+
 ## Responsabilidad final
 
 Las decisiones finales, la revision del codigo, la validacion local y la defensa
