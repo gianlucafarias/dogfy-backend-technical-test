@@ -2,6 +2,7 @@ import type { DeliveryRepositoryPort } from '../../application/ports/delivery-re
 import type { DeliveryStatus } from '../../domain/delivery-status.js';
 import { isTerminalDeliveryStatus } from '../../domain/delivery-status.js';
 import type { Delivery } from '../../domain/delivery.js';
+import type { ProviderCode } from '../../domain/provider.js';
 
 export class InMemoryDeliveryRepository implements DeliveryRepositoryPort {
   private readonly deliveries = new Map<string, Delivery>();
@@ -12,6 +13,20 @@ export class InMemoryDeliveryRepository implements DeliveryRepositoryPort {
 
   async findById(id: string): Promise<Delivery | null> {
     return this.deliveries.get(id) ?? null;
+  }
+
+  async findByProviderDeliveryId(
+    provider: ProviderCode,
+    providerDeliveryId: string,
+  ): Promise<Delivery | null> {
+    return (
+      [...this.deliveries.values()].find((delivery) => {
+        return (
+          delivery.provider === provider &&
+          delivery.providerDeliveryId === providerDeliveryId
+        );
+      }) ?? null
+    );
   }
 
   async findNrwDeliveriesPendingPolling(): Promise<Delivery[]> {

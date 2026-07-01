@@ -3,6 +3,7 @@ import type { DeliveryRepositoryPort } from '../../application/ports/delivery-re
 import type { DeliveryStatus } from '../../domain/delivery-status.js';
 import { terminalDeliveryStatuses } from '../../domain/delivery-status.js';
 import type { Delivery } from '../../domain/delivery.js';
+import type { ProviderCode } from '../../domain/provider.js';
 import type { MongoDeliveryDocument } from './mongo-delivery-document.js';
 import { toDelivery, toMongoDeliveryDocument } from './mongo-delivery-mapper.js';
 import { ensureDeliveryIndexes } from './mongo-indexes.js';
@@ -35,6 +36,22 @@ export class MongoDeliveryRepository implements DeliveryRepositoryPort {
   async findById(id: string): Promise<Delivery | null> {
     const document = await this.collection.findOne({
       _id: id,
+    });
+
+    if (document === null) {
+      return null;
+    }
+
+    return toDelivery(document);
+  }
+
+  async findByProviderDeliveryId(
+    provider: ProviderCode,
+    providerDeliveryId: string,
+  ): Promise<Delivery | null> {
+    const document = await this.collection.findOne({
+      'provider.code': provider,
+      'provider.deliveryId': providerDeliveryId,
     });
 
     if (document === null) {

@@ -9,6 +9,7 @@ import type {
 } from '../src/application/ports/polling-status-provider-port.js';
 import { isTerminalDeliveryStatus, type DeliveryStatus } from '../src/domain/delivery-status.js';
 import type { Delivery } from '../src/domain/delivery.js';
+import type { ProviderCode } from '../src/domain/provider.js';
 import { deliveryFixture } from './support/delivery-fixtures.js';
 
 describe('PollNrwDeliveriesUseCase', () => {
@@ -173,6 +174,20 @@ class RecordingDeliveryRepository implements DeliveryRepositoryPort {
 
   async findById(id: string): Promise<Delivery | null> {
     return this.deliveries.get(id) ?? null;
+  }
+
+  async findByProviderDeliveryId(
+    provider: ProviderCode,
+    providerDeliveryId: string,
+  ): Promise<Delivery | null> {
+    return (
+      [...this.deliveries.values()].find((delivery) => {
+        return (
+          delivery.provider === provider &&
+          delivery.providerDeliveryId === providerDeliveryId
+        );
+      }) ?? null
+    );
   }
 
   async findNrwDeliveriesPendingPolling(): Promise<Delivery[]> {

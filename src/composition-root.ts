@@ -1,8 +1,10 @@
 import { CreateDeliveryUseCase } from './application/create-delivery.js';
 import { GetDeliveryStatusUseCase } from './application/get-delivery-status.js';
+import { HandleTlsWebhookUseCase } from './application/handle-tls-webhook.js';
 import type { DeliveryRepositoryPort } from './application/ports/delivery-repository-port.js';
 import { PollNrwDeliveriesUseCase } from './application/poll-nrw-deliveries.js';
 import { NrwShippingProvider } from './infrastructure/providers/nrw-shipping-provider.js';
+import { mapTlsStatusToDeliveryStatus } from './infrastructure/providers/tls-status-mapper.js';
 import { TlsShippingProvider } from './infrastructure/providers/tls-shipping-provider.js';
 import { InMemoryDeliveryRepository } from './infrastructure/repositories/in-memory-delivery-repository.js';
 import { SystemClock } from './infrastructure/system-clock.js';
@@ -32,6 +34,11 @@ export function buildDeliveryUseCases(options: BuildDeliveryUseCasesOptions = {}
       clock,
     }),
     getDeliveryStatusUseCase: buildGetDeliveryStatusUseCase({ repository }),
+    handleTlsWebhookUseCase: new HandleTlsWebhookUseCase({
+      repository,
+      mapStatus: mapTlsStatusToDeliveryStatus,
+      clock,
+    }),
     pollNrwDeliveriesUseCase: new PollNrwDeliveriesUseCase({
       repository,
       pollingProvider: nrwProvider,

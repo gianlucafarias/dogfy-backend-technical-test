@@ -80,6 +80,32 @@ describe('MongoDeliveryRepository', () => {
     ]);
   });
 
+  it('finds a delivery by provider and provider delivery id', async () => {
+    const repository = new MongoDeliveryRepository(
+      db.collection<MongoDeliveryDocument>('deliveries'),
+    );
+    const tlsDelivery = deliveryFixture({
+      id: 'tls-delivery',
+      provider: 'TLS',
+      providerDeliveryId: 'tls_DEMO-TLS-001',
+    });
+    const nrwDelivery = deliveryFixture({
+      id: 'nrw-delivery',
+      provider: 'NRW',
+      providerDeliveryId: 'tls_DEMO-TLS-001',
+    });
+
+    await repository.save(tlsDelivery);
+    await repository.save(nrwDelivery);
+
+    await expect(
+      repository.findByProviderDeliveryId('TLS', 'tls_DEMO-TLS-001'),
+    ).resolves.toEqual(tlsDelivery);
+    await expect(
+      repository.findByProviderDeliveryId('TLS', 'missing-provider-id'),
+    ).resolves.toBeNull();
+  });
+
   it('updates only the latest known status timestamps', async () => {
     const repository = new MongoDeliveryRepository(
       db.collection<MongoDeliveryDocument>('deliveries'),
