@@ -140,6 +140,65 @@ describe('POST /deliveries', () => {
   });
 });
 
+describe('GET /deliveries/:id/status', () => {
+  it('returns the latest persisted status for a created delivery', async () => {
+    const app = buildApp();
+
+    try {
+      const createResponse = await app.inject({
+        method: 'POST',
+        url: '/deliveries',
+        payload: validPayload('DEMO-NRW-002'),
+      });
+      const createdDelivery = createResponse.json();
+      const statusResponse = await app.inject({
+        method: 'GET',
+        url: `/deliveries/${createdDelivery.id}/status`,
+      });
+      const statusBody = statusResponse.json();
+
+      expect(statusResponse.statusCode).toBe(200);
+      expect(statusBody).toEqual({
+        deliveryId: createdDelivery.id,
+        status: 'created',
+        statusUpdatedAt: createdDelivery.statusUpdatedAt,
+      });
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('returns 404 when the delivery does not exist', async () => {
+    const app = buildApp();
+
+    try {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/deliveries/missing-delivery/status',
+      });
+
+      expect(response.statusCode).toBe(404);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('returns 400 when the delivery id is blank', async () => {
+    const app = buildApp();
+
+    try {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/deliveries/%20/status',
+      });
+
+      expect(response.statusCode).toBe(400);
+    } finally {
+      await app.close();
+    }
+  });
+});
+
 function validPayload(orderReference: string): ShipmentDetails {
   return {
     orderReference,

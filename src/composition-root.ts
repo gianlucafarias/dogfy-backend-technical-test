@@ -1,4 +1,5 @@
 import { CreateDeliveryUseCase } from './application/create-delivery.js';
+import { GetDeliveryStatusUseCase } from './application/get-delivery-status.js';
 import type { DeliveryRepositoryPort } from './application/ports/delivery-repository-port.js';
 import { NrwShippingProvider } from './infrastructure/providers/nrw-shipping-provider.js';
 import { TlsShippingProvider } from './infrastructure/providers/tls-shipping-provider.js';
@@ -9,6 +10,19 @@ import { UuidIdGenerator } from './infrastructure/uuid-id-generator.js';
 type BuildCreateDeliveryUseCaseOptions = {
   repository?: DeliveryRepositoryPort;
 };
+
+type BuildDeliveryUseCasesOptions = {
+  repository?: DeliveryRepositoryPort;
+};
+
+export function buildDeliveryUseCases(options: BuildDeliveryUseCasesOptions = {}) {
+  const repository = options.repository ?? new InMemoryDeliveryRepository();
+
+  return {
+    createDeliveryUseCase: buildCreateDeliveryUseCase({ repository }),
+    getDeliveryStatusUseCase: buildGetDeliveryStatusUseCase({ repository }),
+  };
+}
 
 export function buildCreateDeliveryUseCase(
   options: BuildCreateDeliveryUseCaseOptions = {},
@@ -22,4 +36,10 @@ export function buildCreateDeliveryUseCase(
     idGenerator: new UuidIdGenerator(),
     clock: new SystemClock(),
   });
+}
+
+export function buildGetDeliveryStatusUseCase(
+  options: BuildCreateDeliveryUseCaseOptions = {},
+): GetDeliveryStatusUseCase {
+  return new GetDeliveryStatusUseCase(options.repository ?? new InMemoryDeliveryRepository());
 }

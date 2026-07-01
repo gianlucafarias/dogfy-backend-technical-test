@@ -5,6 +5,13 @@ export class InvalidDeliveryInputError extends Error {
   }
 }
 
+export class DeliveryNotFoundError extends Error {
+  constructor(deliveryId: string) {
+    super(`Delivery not found: ${deliveryId}`);
+    this.name = 'DeliveryNotFoundError';
+  }
+}
+
 export class NoShippingProvidersAvailableError extends Error {
   constructor() {
     super('No shipping providers are available');

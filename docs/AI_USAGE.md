@@ -91,6 +91,26 @@ Decisiones y limites del slice:
 - No se agrega idempotencia ni indice unico por `orderReference`.
 - No se agrega historial de status.
 
+## Slice 4: consultar ultimo status conocido
+
+La IA se uso como apoyo para implementar la consulta del ultimo status persistido:
+
+- caso de uso `GetDeliveryStatus` separado de Fastify;
+- lectura por `DeliveryRepositoryPort.findById`;
+- endpoint `GET /deliveries/:id/status`;
+- respuesta con `deliveryId`, `status` y `statusUpdatedAt`;
+- tests unitarios, HTTP y de persistencia Mongo con `mongodb-memory-server`.
+
+Decisiones y limites del slice:
+
+- La consulta lee desde la persistencia.
+- La consulta no llama adapters NRW ni TLS.
+- No se implementa polling NRW.
+- No se implementa webhook TLS.
+- No se agrega historial de status.
+- No se agrega idempotencia.
+- `POST /deliveries` mantiene su contrato publico.
+
 ## Responsabilidad final
 
 Las decisiones finales, la revision del codigo, la validacion local y la defensa
