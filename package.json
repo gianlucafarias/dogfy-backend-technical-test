@@ -1,0 +1,36 @@
+{
+  "name": "dogfy-backend-technical-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gianlucafarias/dogfy-backend-technical-test.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/gianlucafarias/dogfy-backend-technical-test/issues"
+  },
+  "homepage": "https://github.com/gianlucafarias/dogfy-backend-technical-test#readme",
+  "dependencies": {
+    "fastify": "^5.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  }
+}
