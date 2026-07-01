@@ -42,6 +42,31 @@ La IA se uso como apoyo para crear o revisar:
 Este checkpoint no implementa logica de deliveries, dominio, providers,
 repositorios, MongoDB real ni endpoints de negocio.
 
+## Slice 2: crear delivery y devolver label
+
+La IA se uso como apoyo para implementar el primer flujo de negocio vertical:
+
+- modelo minimo de dominio para delivery, provider, status y label;
+- caso de uso `CreateDelivery` separado de Fastify;
+- puerto comun `ShippingProviderPort` para creacion y label;
+- adapters mock NRW y TLS;
+- seleccion deterministica de provider por `orderReference`;
+- repositorio temporal en memoria;
+- endpoint `POST /deliveries`;
+- tests unitarios y HTTP para el flujo principal y errores esperados.
+
+Decisiones y limites del slice:
+
+- `DEMO-NRW-002` selecciona `NRW`.
+- `DEMO-TLS-001` selecciona `TLS`.
+- El consumidor no puede enviar `provider` en el request.
+- La label es textual y mock.
+- El status inicial devuelto es `created`.
+- No se implementa MongoDB real.
+- No se implementa `GET /deliveries/:id/status`.
+- No se implementan polling NRW ni webhook TLS.
+- No se agrega idempotencia.
+
 ## Responsabilidad final
 
 Las decisiones finales, la revision del codigo, la validacion local y la defensa
