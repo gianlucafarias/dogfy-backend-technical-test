@@ -187,6 +187,28 @@ Decisiones y limites del slice:
 - La validacion final queda a cargo del desarrollador mediante `npm test` y
   `npm run typecheck`.
 
+## Slice 8: documentacion final y guia local
+
+La IA se uso como apoyo para crear una guia final practica de ejecucion local:
+
+- README con descripcion del microservicio, stack y arquitectura en terminos
+  simples;
+- comandos reales para instalar dependencias, levantar MongoDB, correr tests,
+  hacer typecheck y ejecutar la API;
+- ejemplos reproducibles de `POST /deliveries` usando `DEMO-NRW-002` para NRW y
+  `DEMO-TLS-001` para TLS;
+- pasos para consultar status, demostrar polling NRW y enviar webhook TLS;
+- explicacion explicita de tradeoffs y fuera de scope.
+
+Decisiones y limites del slice:
+
+- No se agregaron features nuevas.
+- No se cambio logica de produccion.
+- No se documento OpenAPI/Swagger porque no esta implementado.
+- No se prometieron features fuera del challenge.
+- La validacion final queda a cargo del desarrollador mediante `npm test`,
+  `npm run typecheck` y `docker compose config`.
+
 ## Responsabilidad final
 
 Las decisiones finales, la revision del codigo, la validacion local y la defensa
