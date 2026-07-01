@@ -10,7 +10,9 @@
     "dev": "tsx watch src/server.ts",
     "start": "tsx src/server.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "docker:up": "docker compose up -d mongo",
+    "docker:down": "docker compose down"
   },
   "repository": {
     "type": "git",
@@ -25,10 +27,12 @@
   },
   "homepage": "https://github.com/gianlucafarias/dogfy-backend-technical-test#readme",
   "dependencies": {
-    "fastify": "^5.9.0"
+    "fastify": "^5.9.0",
+    "mongodb": "^7.4.0"
   },
   "devDependencies": {
     "@types/node": "^26.0.1",
+    "mongodb-memory-server": "^11.2.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9"

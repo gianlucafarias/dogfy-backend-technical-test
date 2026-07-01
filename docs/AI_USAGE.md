@@ -67,6 +67,30 @@ Decisiones y limites del slice:
 - No se implementan polling NRW ni webhook TLS.
 - No se agrega idempotencia.
 
+## Slice 3: persistir delivery en MongoDB
+
+La IA se uso como apoyo para reemplazar la persistencia temporal del flujo
+principal por MongoDB usando el driver oficial:
+
+- repositorio `MongoDeliveryRepository`;
+- mappers explicitos dominio <-> documento Mongo;
+- documento Mongo con UUID de dominio como `_id`;
+- conexion configurable por `MONGODB_URI` y `MONGODB_DATABASE`;
+- soporte local con Docker Compose para levantar MongoDB sin Mongo Atlas;
+- indices para busquedas futuras por provider y status;
+- tests de mapper, repositorio y persistencia HTTP con `mongodb-memory-server`.
+
+Decisiones y limites del slice:
+
+- Se usa el driver oficial `mongodb`.
+- No se usa Mongoose ni ningun ODM.
+- El dominio y la aplicacion no importan tipos de MongoDB.
+- `POST /deliveries` mantiene el contrato publico del Slice 2.
+- No se implementa `GET /deliveries/:id/status`.
+- No se implementan polling NRW ni webhook TLS.
+- No se agrega idempotencia ni indice unico por `orderReference`.
+- No se agrega historial de status.
+
 ## Responsabilidad final
 
 Las decisiones finales, la revision del codigo, la validacion local y la defensa

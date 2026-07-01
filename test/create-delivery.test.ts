@@ -155,6 +155,10 @@ class RecordingDeliveryRepository implements DeliveryRepositoryPort {
   async save(delivery: Delivery): Promise<void> {
     this.savedDeliveries.push(delivery);
   }
+
+  async findById(id: string): Promise<Delivery | null> {
+    return this.savedDeliveries.find((delivery) => delivery.id === id) ?? null;
+  }
 }
 
 class RecordingShippingProvider implements ShippingProviderPort {
