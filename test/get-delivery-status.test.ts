@@ -7,6 +7,7 @@ import { GetDeliveryStatusUseCase } from '../src/application/get-delivery-status
 import type { DeliveryRepositoryPort } from '../src/application/ports/delivery-repository-port.js';
 import type { DeliveryStatus } from '../src/domain/delivery-status.js';
 import type { Delivery } from '../src/domain/delivery.js';
+import type { ProviderCode } from '../src/domain/provider.js';
 import { deliveryFixture } from './support/delivery-fixtures.js';
 
 describe('GetDeliveryStatusUseCase', () => {
@@ -72,6 +73,20 @@ class RecordingDeliveryRepository implements DeliveryRepositoryPort {
     this.requestedIds.push(id);
 
     return this.deliveries.get(id) ?? null;
+  }
+
+  async findByProviderDeliveryId(
+    provider: ProviderCode,
+    providerDeliveryId: string,
+  ): Promise<Delivery | null> {
+    return (
+      [...this.deliveries.values()].find((delivery) => {
+        return (
+          delivery.provider === provider &&
+          delivery.providerDeliveryId === providerDeliveryId
+        );
+      }) ?? null
+    );
   }
 
   async findNrwDeliveriesPendingPolling(): Promise<Delivery[]> {

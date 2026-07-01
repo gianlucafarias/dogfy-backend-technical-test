@@ -14,6 +14,7 @@ import type {
   ShippingProviderPort,
 } from '../src/application/ports/shipping-provider-port.js';
 import type { Delivery, ShipmentDetails } from '../src/domain/delivery.js';
+import type { ProviderCode } from '../src/domain/provider.js';
 
 describe('CreateDeliveryUseCase', () => {
   it('creates a delivery through the internally selected provider', async () => {
@@ -158,6 +159,20 @@ class RecordingDeliveryRepository implements DeliveryRepositoryPort {
 
   async findById(id: string): Promise<Delivery | null> {
     return this.savedDeliveries.find((delivery) => delivery.id === id) ?? null;
+  }
+
+  async findByProviderDeliveryId(
+    provider: ProviderCode,
+    providerDeliveryId: string,
+  ): Promise<Delivery | null> {
+    return (
+      this.savedDeliveries.find((delivery) => {
+        return (
+          delivery.provider === provider &&
+          delivery.providerDeliveryId === providerDeliveryId
+        );
+      }) ?? null
+    );
   }
 
   async findNrwDeliveriesPendingPolling(): Promise<Delivery[]> {

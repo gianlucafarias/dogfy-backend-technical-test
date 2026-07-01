@@ -138,6 +138,32 @@ Decisiones y limites del slice:
 - `POST /deliveries` mantiene su contrato publico.
 - `GET /deliveries/:id/status` mantiene su contrato publico.
 
+## Slice 6: procesar webhook TLS
+
+La IA se uso como apoyo para implementar la actualizacion simulada de status
+para deliveries gestionados por TLS mediante webhook:
+
+- caso de uso `HandleTlsWebhook`;
+- endpoint tecnico `POST /webhooks/tls/status`;
+- mapper de status externo TLS a status interno;
+- busqueda de delivery por provider `TLS` y `providerDeliveryId`;
+- reutilizacion de `updateLatestStatus` para persistir el ultimo status conocido;
+- tests unitarios, HTTP, de repositorio Mongo y de flujo con
+  `GET /deliveries/:id/status`.
+
+Decisiones y limites del slice:
+
+- El webhook es un adapter tecnico para simular TLS, no un nuevo endpoint del
+  consumidor interno.
+- TLS no implementa `PollingStatusProviderPort`.
+- Se guarda solo el ultimo status conocido.
+- No se agrega historial de status.
+- No se agrega autenticacion ni firma de webhook.
+- No se agrega idempotencia.
+- No se agrega polling para TLS.
+- `POST /deliveries` mantiene su contrato publico.
+- `GET /deliveries/:id/status` mantiene su contrato publico.
+
 ## Responsabilidad final
 
 Las decisiones finales, la revision del codigo, la validacion local y la defensa
