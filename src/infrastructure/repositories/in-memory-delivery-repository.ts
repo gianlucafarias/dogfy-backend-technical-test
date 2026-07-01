@@ -7,4 +7,8 @@ export class InMemoryDeliveryRepository implements DeliveryRepositoryPort {
   async save(delivery: Delivery): Promise<void> {
     this.deliveries.set(delivery.id, delivery);
   }
+
+  async findById(id: string): Promise<Delivery | null> {
+    return this.deliveries.get(id) ?? null;
+  }
 }
