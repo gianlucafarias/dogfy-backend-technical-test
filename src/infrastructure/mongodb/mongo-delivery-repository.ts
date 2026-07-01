@@ -1,5 +1,7 @@
 import type { Collection } from 'mongodb';
 import type { DeliveryRepositoryPort } from '../../application/ports/delivery-repository-port.js';
+import type { DeliveryStatus } from '../../domain/delivery-status.js';
+import { terminalDeliveryStatuses } from '../../domain/delivery-status.js';
 import type { Delivery } from '../../domain/delivery.js';
 import type { MongoDeliveryDocument } from './mongo-delivery-document.js';
 import { toDelivery, toMongoDeliveryDocument } from './mongo-delivery-mapper.js';
@@ -40,5 +42,35 @@ export class MongoDeliveryRepository implements DeliveryRepositoryPort {
     }
 
     return toDelivery(document);
+  }
+
+  async findNrwDeliveriesPendingPolling(): Promise<Delivery[]> {
+    const documents = await this.collection
+      .find({
+        'provider.code': 'NRW',
+        status: {
+          $nin: [...terminalDeliveryStatuses],
+        },
+      })
+      .toArray();
+
+    return documents.map(toDelivery);
+  }
+
+  async updateLatestStatus(id: string, status: DeliveryStatus, now: Date): Promise<void> {
+    const persistedNow = new Date(now);
+
+    await this.collection.updateOne(
+      {
+        _id: id,
+      },
+      {
+        $set: {
+          status,
+          updatedAt: persistedNow,
+          statusUpdatedAt: persistedNow,
+        },
+      },
+    );
   }
 }

@@ -38,6 +38,76 @@ describe('MongoDeliveryRepository', () => {
     await expect(repository.findById(delivery.id)).resolves.toEqual(delivery);
   });
 
+  it('finds NRW deliveries that are not terminal', async () => {
+    const repository = new MongoDeliveryRepository(
+      db.collection<MongoDeliveryDocument>('deliveries'),
+    );
+
+    await repository.save(
+      deliveryFixture({
+        id: 'nrw-created',
+        provider: 'NRW',
+        status: 'created',
+      }),
+    );
+    await repository.save(
+      deliveryFixture({
+        id: 'nrw-in-transit',
+        provider: 'NRW',
+        status: 'in_transit',
+      }),
+    );
+    await repository.save(
+      deliveryFixture({
+        id: 'nrw-delivered',
+        provider: 'NRW',
+        status: 'delivered',
+      }),
+    );
+    await repository.save(
+      deliveryFixture({
+        id: 'tls-created',
+        provider: 'TLS',
+        status: 'created',
+      }),
+    );
+
+    const deliveries = await repository.findNrwDeliveriesPendingPolling();
+
+    expect(deliveries.map((delivery) => delivery.id).sort()).toEqual([
+      'nrw-created',
+      'nrw-in-transit',
+    ]);
+  });
+
+  it('updates only the latest known status timestamps', async () => {
+    const repository = new MongoDeliveryRepository(
+      db.collection<MongoDeliveryDocument>('deliveries'),
+    );
+    const delivery = deliveryFixture({
+      id: 'delivery-1',
+      status: 'created',
+      createdAt: new Date('2026-07-01T10:00:00.000Z'),
+      updatedAt: new Date('2026-07-01T10:00:00.000Z'),
+      statusUpdatedAt: new Date('2026-07-01T10:00:00.000Z'),
+    });
+
+    await repository.save(delivery);
+    await repository.updateLatestStatus(
+      delivery.id,
+      'in_transit',
+      new Date('2026-07-01T11:00:00.000Z'),
+    );
+
+    await expect(repository.findById(delivery.id)).resolves.toMatchObject({
+      id: delivery.id,
+      status: 'in_transit',
+      createdAt: new Date('2026-07-01T10:00:00.000Z'),
+      updatedAt: new Date('2026-07-01T11:00:00.000Z'),
+      statusUpdatedAt: new Date('2026-07-01T11:00:00.000Z'),
+    });
+  });
+
   it('creates the documented indexes without adding idempotency on orderReference', async () => {
     const collection = db.collection<MongoDeliveryDocument>('deliveries');
     const repository = new MongoDeliveryRepository(collection);

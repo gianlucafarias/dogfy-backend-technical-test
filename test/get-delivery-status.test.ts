@@ -5,6 +5,7 @@ import {
 } from '../src/application/application-errors.js';
 import { GetDeliveryStatusUseCase } from '../src/application/get-delivery-status.js';
 import type { DeliveryRepositoryPort } from '../src/application/ports/delivery-repository-port.js';
+import type { DeliveryStatus } from '../src/domain/delivery-status.js';
 import type { Delivery } from '../src/domain/delivery.js';
 import { deliveryFixture } from './support/delivery-fixtures.js';
 
@@ -71,5 +72,28 @@ class RecordingDeliveryRepository implements DeliveryRepositoryPort {
     this.requestedIds.push(id);
 
     return this.deliveries.get(id) ?? null;
+  }
+
+  async findNrwDeliveriesPendingPolling(): Promise<Delivery[]> {
+    return [];
+  }
+
+  async updateLatestStatus(
+    id: string,
+    status: DeliveryStatus,
+    now: Date,
+  ): Promise<void> {
+    const delivery = this.deliveries.get(id);
+
+    if (delivery === undefined) {
+      return;
+    }
+
+    this.deliveries.set(id, {
+      ...delivery,
+      status,
+      updatedAt: now,
+      statusUpdatedAt: now,
+    });
   }
 }

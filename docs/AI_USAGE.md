@@ -111,6 +111,33 @@ Decisiones y limites del slice:
 - No se agrega idempotencia.
 - `POST /deliveries` mantiene su contrato publico.
 
+## Slice 5: simular polling NRW
+
+La IA se uso como apoyo para implementar la actualizacion simulada de status
+para deliveries gestionados por NRW:
+
+- puerto especifico `PollingStatusProviderPort`;
+- caso de uso `PollNrwDeliveries`;
+- busqueda de deliveries NRW no terminales;
+- actualizacion persistida del ultimo status conocido;
+- adapter mock NRW con polling, simulacion de sin cambios, status desconocido y
+  error por delivery;
+- job local en proceso con intervalo configurable por `POLLING_INTERVAL_MS`;
+- tests unitarios, de repositorio Mongo y de flujo con `GET /deliveries/:id/status`.
+
+Decisiones y limites del slice:
+
+- TLS no implementa polling.
+- El timer queda fuera del core; el caso de uso se puede ejecutar manualmente en
+  tests.
+- Se guarda solo el ultimo status conocido.
+- No se implementa webhook TLS.
+- No se agrega historial de status.
+- No se agregan colas ni scheduler externo.
+- No se agrega idempotencia.
+- `POST /deliveries` mantiene su contrato publico.
+- `GET /deliveries/:id/status` mantiene su contrato publico.
+
 ## Responsabilidad final
 
 Las decisiones finales, la revision del codigo, la validacion local y la defensa
