@@ -3,7 +3,7 @@ import { MongoClient } from 'mongodb';
 import type { Db } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { buildApp } from '../src/app.js';
-import { buildCreateDeliveryUseCase } from '../src/composition-root.js';
+import { buildDeliveryUseCases } from '../src/composition-root.js';
 import type { ShipmentDetails } from '../src/domain/delivery.js';
 import type { MongoDeliveryDocument } from '../src/infrastructure/mongodb/mongo-delivery-document.js';
 import { MongoDeliveryRepository } from '../src/infrastructure/mongodb/mongo-delivery-repository.js';
@@ -34,10 +34,10 @@ describe('POST /deliveries with MongoDB persistence', () => {
       db.collection<MongoDeliveryDocument>('deliveries'),
     );
     await repository.ensureIndexes();
+    const useCases = buildDeliveryUseCases({ repository });
     const app = buildApp({
-      createDeliveryUseCase: buildCreateDeliveryUseCase({
-        repository,
-      }),
+      createDeliveryUseCase: useCases.createDeliveryUseCase,
+      getDeliveryStatusUseCase: useCases.getDeliveryStatusUseCase,
     });
 
     try {
@@ -68,6 +68,40 @@ describe('POST /deliveries with MongoDB persistence', () => {
           deliveryId: 'tls_DEMO-TLS-001',
         },
         status: 'created',
+      });
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('returns status for a delivery persisted in MongoDB', async () => {
+    const repository = new MongoDeliveryRepository(
+      db.collection<MongoDeliveryDocument>('deliveries'),
+    );
+    await repository.ensureIndexes();
+    const useCases = buildDeliveryUseCases({ repository });
+    const app = buildApp({
+      createDeliveryUseCase: useCases.createDeliveryUseCase,
+      getDeliveryStatusUseCase: useCases.getDeliveryStatusUseCase,
+    });
+
+    try {
+      const createResponse = await app.inject({
+        method: 'POST',
+        url: '/deliveries',
+        payload: validPayload('DEMO-NRW-002'),
+      });
+      const createdDelivery = createResponse.json();
+      const statusResponse = await app.inject({
+        method: 'GET',
+        url: `/deliveries/${createdDelivery.id}/status`,
+      });
+
+      expect(statusResponse.statusCode).toBe(200);
+      expect(statusResponse.json()).toEqual({
+        deliveryId: createdDelivery.id,
+        status: 'created',
+        statusUpdatedAt: createdDelivery.statusUpdatedAt,
       });
     } finally {
       await app.close();

@@ -1,5 +1,5 @@
 import { buildApp } from './app.js';
-import { buildCreateDeliveryUseCase } from './composition-root.js';
+import { buildDeliveryUseCases } from './composition-root.js';
 import { connectToMongoFromEnv } from './infrastructure/mongodb/mongo-client.js';
 import { MongoDeliveryRepository } from './infrastructure/mongodb/mongo-delivery-repository.js';
 
@@ -10,11 +10,14 @@ const deliveryRepository = new MongoDeliveryRepository(
 
 await deliveryRepository.ensureIndexes();
 
+const deliveryUseCases = buildDeliveryUseCases({
+  repository: deliveryRepository,
+});
+
 const app = buildApp({
   logger: true,
-  createDeliveryUseCase: buildCreateDeliveryUseCase({
-    repository: deliveryRepository,
-  }),
+  createDeliveryUseCase: deliveryUseCases.createDeliveryUseCase,
+  getDeliveryStatusUseCase: deliveryUseCases.getDeliveryStatusUseCase,
 });
 
 const port = Number(process.env.PORT ?? 3000);
