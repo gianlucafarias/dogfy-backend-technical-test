@@ -32,6 +32,18 @@ La solucion sigue una arquitectura hexagonal pragmatica:
 - `src/http`: rutas Fastify y mapeo HTTP hacia casos de uso.
 - `src/composition-root.ts`: wiring de casos de uso y adapters.
 
+```mermaid
+flowchart LR
+  consumer[Consumidor interno] --> http[src/http Fastify routes]
+  tlsWebhook[TLS webhook mock] --> http
+  http --> app[src/application use cases]
+  app --> domain[src/domain]
+  app --> ports[src/application ports]
+  ports --> mongo[src/infrastructure MongoDB repository]
+  ports --> providers[src/infrastructure provider mocks]
+  polling[NRW polling job] --> app
+```
+
 ## Instalacion
 
 ```bash
@@ -113,6 +125,16 @@ Respuesta esperada:
 ```json
 { "status": "ok" }
 ```
+
+## Documentacion OpenAPI
+
+Con la API levantada, Swagger UI esta disponible en:
+
+```text
+http://localhost:3000/docs
+```
+
+La documentacion se genera desde los schemas declarados en las rutas Fastify.
 
 ## Crear una delivery NRW
 

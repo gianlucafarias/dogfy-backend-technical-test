@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "docker:up": "docker compose up -d mongo",
-    "docker:down": "docker compose down"
+    "docker:down": "docker compose down",
+    "docker:dbclean": "docker exec dogfy-mongo mongosh dogfy-logistics --quiet --eval 'db.deliveries.deleteMany({})'"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,8 @@
   },
   "homepage": "https://github.com/gianlucafarias/dogfy-backend-technical-test#readme",
   "dependencies": {
+    "@fastify/swagger": "^9.7.0",
+    "@fastify/swagger-ui": "^6.0.0",
     "fastify": "^5.9.0",
     "mongodb": "^7.4.0"
   },

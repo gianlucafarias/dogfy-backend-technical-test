@@ -1,4 +1,6 @@
 import Fastify from 'fastify';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 import { buildDeliveryUseCases } from './composition-root.js';
 import { registerDeliveryRoutes } from './http/deliveries-routes.js';
 import { registerWebhookRoutes } from './http/webhooks-routes.js';
@@ -36,12 +38,31 @@ export function buildApp(options: BuildAppOptions = {}) {
   const handleTlsWebhookUseCase =
     options.handleTlsWebhookUseCase ?? defaultUseCases.handleTlsWebhookUseCase;
 
-  app.get('/health', async () => {
-    return { status: 'ok' };
+  app.register(swagger, {
+    openapi: {
+      openapi: '3.0.3',
+      info: {
+        title: 'Dogfy Logistics API',
+        description: 'Internal logistics API for creating deliveries and reading status.',
+        version: '1.0.0',
+      },
+    },
   });
 
-  registerDeliveryRoutes(app, { createDeliveryUseCase, getDeliveryStatusUseCase });
-  registerWebhookRoutes(app, { handleTlsWebhookUseCase });
+  app.register(swaggerUi, {
+    routePrefix: '/docs',
+  });
+
+  app.register((routesApp, _options, done) => {
+    routesApp.get('/health', async () => {
+      return { status: 'ok' };
+    });
+
+    registerDeliveryRoutes(routesApp, { createDeliveryUseCase, getDeliveryStatusUseCase });
+    registerWebhookRoutes(routesApp, { handleTlsWebhookUseCase });
+
+    done();
+  });
 
   return app;
 }

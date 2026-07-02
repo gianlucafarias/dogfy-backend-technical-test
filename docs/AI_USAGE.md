@@ -4,6 +4,49 @@ Este documento registra como se uso asistencia de IA durante el proyecto. Es un
 documento vivo y debe actualizarse en los checkpoints importantes de specs,
 implementacion, tests y documentacion.
 
+## Herramientas de IA utilizadas
+
+Durante el desarrollo se utilizaron herramientas de IA como apoyo, no como
+fuente automatica de decisiones.
+
+- Claude/Claude Code: usado para preparar el enfoque de trabajo, revisar el challenge,
+  estructurar specs, definir vertical slices, analizar tradeoffs, preparar prompts,
+  revisar gaps de tests y preparar la defensa tecnica.
+
+- Codex/ChatGPT: usado como asistente de implementacion dentro del editor
+  para aplicar cambios acotados por slice, siguiendo los documentos de contexto
+  del proyecto y las restricciones definidas previamente.
+
+- Cursor: usado como IDE principal para navegar el codigo, revisar cambios,
+  aplicar quick fixes puntuales y validar el codigo terminado durante el flujo
+  de desarrollo.
+
+La IA se uso principalmente para:
+- convertir el enunciado en specs tecnicas y funcionales;
+- proponer planes de implementacion pequenos;
+- implementar cambios siguiendo restricciones;
+- sugerir tests y detectar gaps;
+- revisar documentacion;
+- preparar escenarios de defensa y tradeoffs.
+
+Las decisiones finales de arquitectura, alcance, aceptacion de cambios,
+validacion y defensa quedaron bajo responsabilidad del desarrollador.
+
+## Estructura de prompts utilizada
+
+Los prompts se escribieron siguiendo una estructura repetible para mantener el
+contexto bajo control y evitar cambios fuera de scope:
+
+Ejemplo resumido de prompt:
+
+```text
+Estamos trabajando en Slice X: [objetivo].
+Contexto: Node.js + TypeScript + Fastify, DDD y arquitectura hexagonal.
+Restricciones: no agregar features fuera de scope, no cambiar contratos publicos
+sin validacion, mantener cambios pequenos y testeables.
+Tarea: proponer primero un plan con archivos afectados y tests. No implementar
+hasta validar el plan.
+
 ## Checkpoint inicial de specs
 
 El proyecto parte de estos documentos aceptados:
@@ -208,6 +251,26 @@ Decisiones y limites del slice:
 - No se prometieron features fuera del challenge.
 - La validacion final queda a cargo del desarrollador mediante `npm test`,
   `npm run typecheck` y `docker compose config`.
+
+## Slice 9: OpenAPI docs y diagrama de arquitectura
+
+La IA se uso como apoyo para agregar documentacion tecnica ligera sobre la API:
+
+- registro de los plugins oficiales `@fastify/swagger` y `@fastify/swagger-ui`;
+- exposicion de Swagger UI en `/docs`;
+- generacion de OpenAPI desde los schemas ya declarados en las rutas Fastify;
+- diagrama Mermaid simple en el README para explicar el flujo de arquitectura;
+- smoke test minimo para comprobar que la documentacion se registra.
+
+Decisiones y limites del slice:
+
+- No se cambio logica de negocio.
+- No se cambiaron contratos publicos existentes.
+- No se agregaron endpoints funcionales nuevos.
+- No se agrego OpenAPI manual complejo.
+- No se agregaron auth, idempotencia, retries ni historial de status.
+- La validacion final queda a cargo del desarrollador mediante `npm test` y
+  `npm run typecheck`.
 
 ## Responsabilidad final
 
