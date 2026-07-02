@@ -41,11 +41,15 @@ Ejemplo resumido de prompt:
 
 ```text
 Estamos trabajando en Slice X: [objetivo].
+
 Contexto: Node.js + TypeScript + Fastify, DDD y arquitectura hexagonal.
+
 Restricciones: no agregar features fuera de scope, no cambiar contratos publicos
 sin validacion, mantener cambios pequenos y testeables.
+
 Tarea: proponer primero un plan con archivos afectados y tests. No implementar
 hasta validar el plan.
+```
 
 ## Checkpoint inicial de specs
 
