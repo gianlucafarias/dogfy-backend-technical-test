@@ -36,8 +36,7 @@ describe('POST /deliveries with MongoDB persistence', () => {
     await repository.ensureIndexes();
     const useCases = buildDeliveryUseCases({ repository });
     const app = buildApp({
-      createDeliveryUseCase: useCases.createDeliveryUseCase,
-      getDeliveryStatusUseCase: useCases.getDeliveryStatusUseCase,
+      deliveryUseCases: useCases,
     });
 
     try {
@@ -82,8 +81,7 @@ describe('POST /deliveries with MongoDB persistence', () => {
     await repository.ensureIndexes();
     const useCases = buildDeliveryUseCases({ repository });
     const app = buildApp({
-      createDeliveryUseCase: useCases.createDeliveryUseCase,
-      getDeliveryStatusUseCase: useCases.getDeliveryStatusUseCase,
+      deliveryUseCases: useCases,
     });
 
     try {
@@ -116,8 +114,7 @@ describe('POST /deliveries with MongoDB persistence', () => {
     await repository.ensureIndexes();
     const useCases = buildDeliveryUseCases({ repository });
     const app = buildApp({
-      createDeliveryUseCase: useCases.createDeliveryUseCase,
-      getDeliveryStatusUseCase: useCases.getDeliveryStatusUseCase,
+      deliveryUseCases: useCases,
     });
 
     try {

@@ -36,8 +36,7 @@ describe('NRW polling flow', () => {
     await repository.ensureIndexes();
     const useCases = buildDeliveryUseCases({ repository });
     const app = buildApp({
-      createDeliveryUseCase: useCases.createDeliveryUseCase,
-      getDeliveryStatusUseCase: useCases.getDeliveryStatusUseCase,
+      deliveryUseCases: useCases,
     });
 
     try {
