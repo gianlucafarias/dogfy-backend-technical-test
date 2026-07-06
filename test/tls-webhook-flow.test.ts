@@ -127,6 +127,70 @@ describe('TLS webhook flow', () => {
       await app.close();
     }
   });
+
+  it('updates the matching TLS delivery when duplicate order references are created', async () => {
+    const repository = new MongoDeliveryRepository(
+      db.collection<MongoDeliveryDocument>('deliveries'),
+    );
+    await repository.ensureIndexes();
+    const useCases = buildDeliveryUseCases({ repository });
+    const app = buildApp({
+      createDeliveryUseCase: useCases.createDeliveryUseCase,
+      getDeliveryStatusUseCase: useCases.getDeliveryStatusUseCase,
+      handleTlsWebhookUseCase: useCases.handleTlsWebhookUseCase,
+    });
+
+    try {
+      const firstCreateResponse = await app.inject({
+        method: 'POST',
+        url: '/deliveries',
+        payload: validPayload('DEMO-TLS-001'),
+      });
+      const secondCreateResponse = await app.inject({
+        method: 'POST',
+        url: '/deliveries',
+        payload: validPayload('DEMO-TLS-001'),
+      });
+      const firstDelivery = firstCreateResponse.json();
+      const secondDelivery = secondCreateResponse.json();
+
+      const webhookResponse = await app.inject({
+        method: 'POST',
+        url: '/webhooks/tls/status',
+        payload: {
+          providerDeliveryId: secondDelivery.providerDeliveryId,
+          status: 'DELIVERED',
+        },
+      });
+      const firstStatusResponse = await app.inject({
+        method: 'GET',
+        url: `/deliveries/${firstDelivery.id}/status`,
+      });
+      const secondStatusResponse = await app.inject({
+        method: 'GET',
+        url: `/deliveries/${secondDelivery.id}/status`,
+      });
+
+      expect(firstCreateResponse.statusCode).toBe(201);
+      expect(secondCreateResponse.statusCode).toBe(201);
+      expect(firstDelivery.providerDeliveryId).not.toBe(secondDelivery.providerDeliveryId);
+      expect(webhookResponse.statusCode).toBe(200);
+      expect(webhookResponse.json()).toMatchObject({
+        deliveryId: secondDelivery.id,
+        status: 'delivered',
+      });
+      expect(firstStatusResponse.json()).toMatchObject({
+        deliveryId: firstDelivery.id,
+        status: 'created',
+      });
+      expect(secondStatusResponse.json()).toMatchObject({
+        deliveryId: secondDelivery.id,
+        status: 'delivered',
+      });
+    } finally {
+      await app.close();
+    }
+  });
 });
 
 function validPayload(orderReference: string): ShipmentDetails {

@@ -57,15 +57,16 @@ describe('POST /deliveries with MongoDB persistence', () => {
         id: body.id,
         orderReference: 'DEMO-TLS-001',
         provider: 'TLS',
-        providerDeliveryId: 'tls_DEMO-TLS-001',
+        providerDeliveryId: body.providerDeliveryId,
         status: 'created',
       });
+      expect(body.providerDeliveryId).toMatch(/^tls_DEMO-TLS-001_[0-9a-f-]{36}$/);
       expect(persistedDocument).toMatchObject({
         _id: body.id,
         orderReference: 'DEMO-TLS-001',
         provider: {
           code: 'TLS',
-          deliveryId: 'tls_DEMO-TLS-001',
+          deliveryId: body.providerDeliveryId,
         },
         status: 'created',
       });
