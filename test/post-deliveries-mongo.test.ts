@@ -107,6 +107,53 @@ describe('POST /deliveries with MongoDB persistence', () => {
       await app.close();
     }
   });
+
+  it('persists a minimal valid delivery without making optional fields unreadable', async () => {
+    const repository = new MongoDeliveryRepository(
+      db.collection<MongoDeliveryDocument>('deliveries'),
+    );
+    await repository.ensureIndexes();
+    const useCases = buildDeliveryUseCases({ repository });
+    const app = buildApp({
+      createDeliveryUseCase: useCases.createDeliveryUseCase,
+      getDeliveryStatusUseCase: useCases.getDeliveryStatusUseCase,
+    });
+
+    try {
+      const createResponse = await app.inject({
+        method: 'POST',
+        url: '/deliveries',
+        payload: minimalPayload('DEMO-NRW-002'),
+      });
+      const createdDelivery = createResponse.json();
+      const persistedDocument = await db
+        .collection<MongoDeliveryDocument>('deliveries')
+        .findOne({ _id: createdDelivery.id });
+      const statusResponse = await app.inject({
+        method: 'GET',
+        url: `/deliveries/${createdDelivery.id}/status`,
+      });
+
+      expect(createResponse.statusCode).toBe(201);
+      expect(persistedDocument?.recipient).toEqual({
+        name: 'Jane Doe',
+      });
+      expect(persistedDocument?.address).toEqual({
+        line1: 'Calle Example 123',
+        postalCode: '08001',
+        city: 'Barcelona',
+        country: 'ES',
+      });
+      expect(statusResponse.statusCode).toBe(200);
+      expect(statusResponse.json()).toEqual({
+        deliveryId: createdDelivery.id,
+        status: 'created',
+        statusUpdatedAt: createdDelivery.statusUpdatedAt,
+      });
+    } finally {
+      await app.close();
+    }
+  });
 });
 
 function validPayload(orderReference: string): ShipmentDetails {
@@ -120,6 +167,24 @@ function validPayload(orderReference: string): ShipmentDetails {
     address: {
       line1: 'Calle Example 123',
       line2: '2A',
+      postalCode: '08001',
+      city: 'Barcelona',
+      country: 'ES',
+    },
+    package: {
+      weightGrams: 1200,
+    },
+  };
+}
+
+function minimalPayload(orderReference: string): ShipmentDetails {
+  return {
+    orderReference,
+    recipient: {
+      name: 'Jane Doe',
+    },
+    address: {
+      line1: 'Calle Example 123',
       postalCode: '08001',
       city: 'Barcelona',
       country: 'ES',
