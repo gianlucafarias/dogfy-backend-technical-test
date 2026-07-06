@@ -75,9 +75,9 @@ export function resolvePollingIntervalMs(env: NodeJS.ProcessEnv): number {
 
   const intervalMs = Number(configuredInterval);
 
-  if (!Number.isFinite(intervalMs) || intervalMs <= 0) {
-    throw new Error('POLLING_INTERVAL_MS must be a positive number');
+  if (!Number.isInteger(intervalMs) || intervalMs <= 0) {
+    throw new Error('POLLING_INTERVAL_MS must be a positive integer');
   }
 
-  return Math.trunc(intervalMs);
+  return intervalMs;
 }

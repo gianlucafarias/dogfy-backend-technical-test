@@ -80,6 +80,33 @@ describe('HandleTlsWebhookUseCase', () => {
     expect(repository.updates).toHaveLength(0);
   });
 
+  it('does not regress a terminal delivery when an older TLS status arrives', async () => {
+    const deliveredAt = new Date('2026-07-01T11:00:00.000Z');
+    const repository = new RecordingDeliveryRepository([
+      deliveryFixture({
+        id: 'delivery-1',
+        provider: 'TLS',
+        providerDeliveryId: 'tls_DEMO-TLS-001',
+        status: 'delivered',
+        updatedAt: deliveredAt,
+        statusUpdatedAt: deliveredAt,
+      }),
+    ]);
+    const useCase = buildUseCase(repository);
+
+    await expect(
+      useCase.execute({
+        providerDeliveryId: 'tls_DEMO-TLS-001',
+        status: 'READY',
+      }),
+    ).resolves.toEqual({
+      deliveryId: 'delivery-1',
+      status: 'delivered',
+      statusUpdatedAt: deliveredAt,
+    });
+    expect(repository.updates).toHaveLength(0);
+  });
+
   it('rejects invalid payloads before touching the repository', async () => {
     const repository = new RecordingDeliveryRepository([]);
     const useCase = buildUseCase(repository);
@@ -104,6 +131,7 @@ function buildUseCase(repository: DeliveryRepositoryPort): HandleTlsWebhookUseCa
 
 function mapTlsStatus(status: string): DeliveryStatus | null {
   const statuses: Record<string, DeliveryStatus> = {
+    READY: 'created',
     IN_TRANSIT: 'in_transit',
     DELIVERED: 'delivered',
     FAILED: 'failed',

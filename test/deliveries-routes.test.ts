@@ -72,6 +72,9 @@ describe('POST /deliveries', () => {
       });
 
       expect(response.statusCode).toBe(400);
+      expect(response.json()).toEqual({
+        error: 'Invalid body: recipient is required',
+      });
     } finally {
       await app.close();
     }
@@ -91,6 +94,9 @@ describe('POST /deliveries', () => {
       });
 
       expect(response.statusCode).toBe(400);
+      expect(response.json()).toEqual({
+        error: 'Invalid body: provider is not allowed',
+      });
     } finally {
       await app.close();
     }

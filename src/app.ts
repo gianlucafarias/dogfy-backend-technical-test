@@ -25,6 +25,19 @@ type DeliveryRouteUseCases = {
   };
 };
 
+type SchemaValidationError = {
+  keyword: string;
+  instancePath: string;
+  params: Record<string, unknown>;
+  message?: string;
+};
+
+type FastifyRequestValidationError = {
+  statusCode: number;
+  validation: readonly SchemaValidationError[];
+  validationContext?: string;
+};
+
 export function buildApp(options: BuildAppOptions = {}) {
   assertNoLegacyUseCaseOverrides(options);
   const deliveryUseCases = resolveDeliveryUseCases(options);
@@ -36,6 +49,18 @@ export function buildApp(options: BuildAppOptions = {}) {
         removeAdditional: false,
       },
     },
+  });
+  app.setErrorHandler((error, _request, reply) => {
+    if (isRequestValidationError(error)) {
+      return reply.code(400).send({
+        error: formatSchemaValidationError(
+          error.validationContext ?? 'request',
+          error.validation,
+        ),
+      });
+    }
+
+    return reply.send(error instanceof Error ? error : new Error(String(error)));
   });
 
   app.register(swagger, {
@@ -106,4 +131,82 @@ function assertNoLegacyUseCaseOverrides(options: BuildAppOptions): void {
   ) {
     throw new Error('Pass delivery use cases as one deliveryUseCases object');
   }
+}
+
+function formatSchemaValidationError(
+  context: string,
+  errors: readonly SchemaValidationError[],
+): string {
+  const firstError = errors[0];
+
+  if (firstError === undefined) {
+    return `Invalid ${context}`;
+  }
+
+  if (firstError.keyword === 'required') {
+    const field = joinValidationPath(
+      firstError.instancePath,
+      stringParam(firstError, 'missingProperty'),
+    );
+
+    return `Invalid ${context}: ${field} is required`;
+  }
+
+  if (firstError.keyword === 'additionalProperties') {
+    const field = joinValidationPath(
+      firstError.instancePath,
+      stringParam(firstError, 'additionalProperty'),
+    );
+
+    return `Invalid ${context}: ${field} is not allowed`;
+  }
+
+  const field = formatValidationPath(firstError.instancePath);
+
+  if (firstError.keyword === 'minLength') {
+    return `Invalid ${context}: ${field} must not be empty`;
+  }
+
+  if (firstError.keyword === 'exclusiveMinimum') {
+    return `Invalid ${context}: ${field} must be greater than ${stringParam(
+      firstError,
+      'limit',
+    )}`;
+  }
+
+  return `Invalid ${context}: ${[field, firstError.message]
+    .filter((part): part is string => typeof part === 'string' && part.length > 0)
+    .join(' ')}`;
+}
+
+function joinValidationPath(instancePath: string, childPath: string): string {
+  const parts = [formatValidationPath(instancePath), childPath].filter(
+    (part): part is string => part.length > 0,
+  );
+
+  return parts.join('.');
+}
+
+function formatValidationPath(instancePath: string): string {
+  return instancePath
+    .split('/')
+    .filter((part) => part.length > 0)
+    .map((part) => part.replace(/~1/g, '/').replace(/~0/g, '~'))
+    .join('.');
+}
+
+function stringParam(error: SchemaValidationError, name: string): string {
+  const value = error.params[name];
+
+  return typeof value === 'string' ? value : '';
+}
+
+function isRequestValidationError(error: unknown): error is FastifyRequestValidationError {
+  if (typeof error !== 'object' || error === null) {
+    return false;
+  }
+
+  const candidate = error as Partial<FastifyRequestValidationError>;
+
+  return candidate.statusCode === 400 && Array.isArray(candidate.validation);
 }

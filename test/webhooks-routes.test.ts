@@ -96,6 +96,9 @@ describe('POST /webhooks/tls/status', () => {
       });
 
       expect(response.statusCode).toBe(400);
+      expect(response.json()).toEqual({
+        error: 'Unsupported TLS status: LOST_IN_HUB',
+      });
     } finally {
       await app.close();
     }
@@ -114,6 +117,9 @@ describe('POST /webhooks/tls/status', () => {
       });
 
       expect(response.statusCode).toBe(400);
+      expect(response.json()).toEqual({
+        error: 'Invalid body: status is required',
+      });
     } finally {
       await app.close();
     }

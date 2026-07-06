@@ -5,6 +5,7 @@ import {
 import type { ClockPort } from './ports/clock-port.js';
 import type { DeliveryRepositoryPort } from './ports/delivery-repository-port.js';
 import type { DeliveryStatus } from '../domain/delivery-status.js';
+import { isTerminalDeliveryStatus } from '../domain/delivery-status.js';
 import { DomainValidationError } from '../domain/domain-errors.js';
 import { requireNonEmptyString, requireRecord } from '../domain/validation.js';
 
@@ -58,6 +59,14 @@ export class HandleTlsWebhookUseCase {
     }
 
     const now = this.clock.now();
+
+    if (isTerminalDeliveryStatus(delivery.status) && status !== delivery.status) {
+      return {
+        deliveryId: delivery.id,
+        status: delivery.status,
+        statusUpdatedAt: delivery.statusUpdatedAt,
+      };
+    }
 
     await this.repository.updateLatestStatus(delivery.id, status, now);
 

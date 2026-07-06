@@ -124,6 +124,67 @@ describe('TLS webhook flow', () => {
     }
   });
 
+  it('does not regress a delivered TLS delivery when an older status arrives', async () => {
+    const repository = new MongoDeliveryRepository(
+      db.collection<MongoDeliveryDocument>('deliveries'),
+    );
+    await repository.ensureIndexes();
+    const useCases = buildDeliveryUseCases({ repository });
+    const app = buildApp({
+      deliveryUseCases: useCases,
+    });
+
+    try {
+      const createResponse = await app.inject({
+        method: 'POST',
+        url: '/deliveries',
+        payload: validPayload('DEMO-TLS-001'),
+      });
+      const createdDelivery = createResponse.json();
+
+      const deliveredWebhookResponse = await app.inject({
+        method: 'POST',
+        url: '/webhooks/tls/status',
+        payload: {
+          providerDeliveryId: createdDelivery.providerDeliveryId,
+          status: 'DELIVERED',
+        },
+      });
+      const deliveredWebhookBody = deliveredWebhookResponse.json();
+      const readyWebhookResponse = await app.inject({
+        method: 'POST',
+        url: '/webhooks/tls/status',
+        payload: {
+          providerDeliveryId: createdDelivery.providerDeliveryId,
+          status: 'READY',
+        },
+      });
+      const statusResponse = await app.inject({
+        method: 'GET',
+        url: `/deliveries/${createdDelivery.id}/status`,
+      });
+
+      expect(deliveredWebhookResponse.statusCode).toBe(200);
+      expect(deliveredWebhookBody).toMatchObject({
+        deliveryId: createdDelivery.id,
+        status: 'delivered',
+      });
+      expect(readyWebhookResponse.statusCode).toBe(200);
+      expect(readyWebhookResponse.json()).toEqual({
+        deliveryId: createdDelivery.id,
+        status: 'delivered',
+        statusUpdatedAt: deliveredWebhookBody.statusUpdatedAt,
+      });
+      expect(statusResponse.json()).toEqual({
+        deliveryId: createdDelivery.id,
+        status: 'delivered',
+        statusUpdatedAt: deliveredWebhookBody.statusUpdatedAt,
+      });
+    } finally {
+      await app.close();
+    }
+  });
+
   it('updates the matching TLS delivery when duplicate order references are created', async () => {
     const repository = new MongoDeliveryRepository(
       db.collection<MongoDeliveryDocument>('deliveries'),
