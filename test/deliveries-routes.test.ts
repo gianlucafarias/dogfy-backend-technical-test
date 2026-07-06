@@ -22,13 +22,13 @@ describe('POST /deliveries', () => {
       expect(body).toMatchObject({
         orderReference: 'DEMO-NRW-002',
         provider: 'NRW',
-        providerDeliveryId: 'nrw_DEMO-NRW-002',
         status: 'created',
         label: {
           format: 'text',
         },
       });
       expect(body.id).toEqual(expect.any(String));
+      expect(body.providerDeliveryId).toMatch(/^nrw_DEMO-NRW-002_[0-9a-f-]{36}$/);
       expect(body.label.content).toContain('NRW SHIPPING LABEL');
       expect(body.createdAt).toEqual(expect.any(String));
     } finally {
@@ -49,7 +49,7 @@ describe('POST /deliveries', () => {
 
       expect(response.statusCode).toBe(201);
       expect(body.provider).toBe('TLS');
-      expect(body.providerDeliveryId).toBe('tls_DEMO-TLS-001');
+      expect(body.providerDeliveryId).toMatch(/^tls_DEMO-TLS-001_[0-9a-f-]{36}$/);
       expect(body.label.content).toContain('TLS SHIPPING LABEL');
       expect(body.status).toBe('created');
     } finally {

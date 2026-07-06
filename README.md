@@ -163,8 +163,8 @@ curl -s -X POST http://localhost:3000/deliveries \
   }'
 ```
 
-La respuesta debe incluir `provider: "NRW"`, `status: "created"` y una label
-textual mock.
+La respuesta debe incluir `provider: "NRW"`, `status: "created"`, un
+`providerDeliveryId` con prefijo `nrw_DEMO-NRW-002_` y una label textual mock.
 
 ## Crear una delivery TLS
 
@@ -193,8 +193,8 @@ curl -s -X POST http://localhost:3000/deliveries \
   }'
 ```
 
-La respuesta debe incluir `provider: "TLS"`, `status: "created"` y una label
-textual mock.
+La respuesta debe incluir `provider: "TLS"`, `status: "created"`, un
+`providerDeliveryId` con prefijo `tls_DEMO-TLS-001_` y una label textual mock.
 
 ## Consultar status
 
@@ -223,8 +223,9 @@ El polling corre dentro del proceso de la API. No hay worker externo ni cola.
 
 ## Demostrar webhook TLS
 
-Crear una delivery con `DEMO-TLS-001`. Su `providerDeliveryId` sera similar a
-`tls_DEMO-TLS-001`.
+Crear una delivery con `DEMO-TLS-001` y copiar el `providerDeliveryId` devuelto
+en la respuesta. El valor empieza con `tls_DEMO-TLS-001_` y es unico por
+delivery creada.
 
 Enviar un webhook mock:
 
@@ -232,7 +233,7 @@ Enviar un webhook mock:
 curl -s -X POST http://localhost:3000/webhooks/tls/status \
   -H "Content-Type: application/json" \
   -d '{
-    "providerDeliveryId": "tls_DEMO-TLS-001",
+    "providerDeliveryId": "<provider-delivery-id>",
     "status": "DELIVERED"
   }'
 ```

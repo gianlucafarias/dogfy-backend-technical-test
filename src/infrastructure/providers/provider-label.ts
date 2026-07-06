@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { ShipmentDetails } from '../../domain/delivery.js';
 
 export function buildTextLabel(providerName: string, command: ShipmentDetails): string {
@@ -13,5 +14,5 @@ export function buildTextLabel(providerName: string, command: ShipmentDetails): 
 export function buildProviderDeliveryId(prefix: string, orderReference: string): string {
   const normalizedReference = orderReference.trim().toUpperCase().replace(/[^A-Z0-9]+/g, '-');
 
-  return `${prefix}_${normalizedReference}`;
+  return `${prefix}_${normalizedReference}_${randomUUID()}`;
 }
