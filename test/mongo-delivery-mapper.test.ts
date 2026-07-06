@@ -38,10 +38,68 @@ describe('mongo delivery mapper', () => {
     });
   });
 
+  it('omits undefined optional shipment fields when mapping to Mongo', () => {
+    const document = toMongoDeliveryDocument(
+      deliveryFixture({
+        recipient: {
+          name: 'Jane Doe',
+        },
+        address: {
+          line1: 'Calle Example 123',
+          postalCode: '08001',
+          city: 'Barcelona',
+          country: 'ES',
+        },
+      }),
+    );
+
+    expect(document.recipient).toEqual({
+      name: 'Jane Doe',
+    });
+    expect(document.address).toEqual({
+      line1: 'Calle Example 123',
+      postalCode: '08001',
+      city: 'Barcelona',
+      country: 'ES',
+    });
+  });
+
   it('maps a Mongo document back to the domain shape', () => {
     const delivery = toDelivery(documentFixture());
 
     expect(delivery).toEqual(deliveryFixture());
+  });
+
+  it('treats null optional shipment fields from Mongo as missing', () => {
+    const delivery = toDelivery(
+      documentFixture({
+        recipient: {
+          name: 'Jane Doe',
+          phone: null as never,
+          email: null as never,
+        },
+        address: {
+          line1: 'Calle Example 123',
+          line2: null as never,
+          postalCode: '08001',
+          city: 'Barcelona',
+          country: 'ES',
+        },
+      }),
+    );
+
+    expect(delivery.recipient).toEqual({
+      name: 'Jane Doe',
+      phone: undefined,
+      email: undefined,
+    });
+    expect(delivery.address).toEqual({
+      line1: 'Calle Example 123',
+      line2: undefined,
+      postalCode: '08001',
+      city: 'Barcelona',
+      country: 'ES',
+    });
   });
 
   it('rejects Mongo documents with unsupported provider or status values', () => {

@@ -1,8 +1,9 @@
 import type { PollNrwDeliveriesUseCase } from '../../application/poll-nrw-deliveries.js';
 
-const DEFAULT_POLLING_INTERVAL_MS = 5000;
+const DEFAULT_POLLING_INTERVAL_MS = 60000;
 
 type PollingJobLogger = {
+  info(message: string): void;
   error(message: string): void;
 };
 
@@ -53,7 +54,10 @@ export class NrwPollingJob {
     this.running = true;
 
     try {
-      await this.useCase.execute();
+      const result = await this.useCase.execute();
+      this.logger?.info(
+        `NRW polling completed: checked=${result.checked} updated=${result.updated} unchanged=${result.unchanged} unknownStatus=${result.unknownStatus} failed=${result.failed}`,
+      );
     } catch (error) {
       this.logger?.error(`NRW polling job failed: ${String(error)}`);
     } finally {
