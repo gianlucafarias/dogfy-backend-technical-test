@@ -41,6 +41,14 @@ describe('delivery domain', () => {
     expect(delivery.createdAt).toEqual(new Date('2026-07-01T10:00:00.000Z'));
     expect(delivery.updatedAt).toEqual(new Date('2026-07-01T10:00:00.000Z'));
     expect(delivery.statusUpdatedAt).toEqual(new Date('2026-07-01T10:00:00.000Z'));
+    expect(delivery.createdAt).not.toBe(delivery.updatedAt);
+    expect(delivery.createdAt).not.toBe(delivery.statusUpdatedAt);
+    expect(delivery.updatedAt).not.toBe(delivery.statusUpdatedAt);
+
+    delivery.createdAt.setFullYear(2030);
+
+    expect(delivery.updatedAt).toEqual(new Date('2026-07-01T10:00:00.000Z'));
+    expect(delivery.statusUpdatedAt).toEqual(new Date('2026-07-01T10:00:00.000Z'));
   });
 
   it('normalizes shipment details and trims string values', () => {

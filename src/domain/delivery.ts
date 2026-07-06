@@ -92,8 +92,6 @@ export function createDeliveryEntity(params: CreateDeliveryEntityParams): Delive
     throw new DomainValidationError('now must be a valid date');
   }
 
-  const now = new Date(params.now);
-
   return {
     id: requireNonEmptyString(params.id, 'id'),
     ...shipmentDetails,
@@ -101,8 +99,8 @@ export function createDeliveryEntity(params: CreateDeliveryEntityParams): Delive
     providerDeliveryId: requireNonEmptyString(params.providerDeliveryId, 'providerDeliveryId'),
     label: normalizeLabel(params.label),
     status: 'created',
-    createdAt: now,
-    updatedAt: now,
-    statusUpdatedAt: now,
+    createdAt: new Date(params.now),
+    updatedAt: new Date(params.now),
+    statusUpdatedAt: new Date(params.now),
   };
 }
