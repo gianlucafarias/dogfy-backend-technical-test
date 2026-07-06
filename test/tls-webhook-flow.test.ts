@@ -36,9 +36,7 @@ describe('TLS webhook flow', () => {
     await repository.ensureIndexes();
     const useCases = buildDeliveryUseCases({ repository });
     const app = buildApp({
-      createDeliveryUseCase: useCases.createDeliveryUseCase,
-      getDeliveryStatusUseCase: useCases.getDeliveryStatusUseCase,
-      handleTlsWebhookUseCase: useCases.handleTlsWebhookUseCase,
+      deliveryUseCases: useCases,
     });
 
     try {
@@ -90,9 +88,7 @@ describe('TLS webhook flow', () => {
     await repository.ensureIndexes();
     const useCases = buildDeliveryUseCases({ repository });
     const app = buildApp({
-      createDeliveryUseCase: useCases.createDeliveryUseCase,
-      getDeliveryStatusUseCase: useCases.getDeliveryStatusUseCase,
-      handleTlsWebhookUseCase: useCases.handleTlsWebhookUseCase,
+      deliveryUseCases: useCases,
     });
 
     try {
@@ -135,9 +131,7 @@ describe('TLS webhook flow', () => {
     await repository.ensureIndexes();
     const useCases = buildDeliveryUseCases({ repository });
     const app = buildApp({
-      createDeliveryUseCase: useCases.createDeliveryUseCase,
-      getDeliveryStatusUseCase: useCases.getDeliveryStatusUseCase,
-      handleTlsWebhookUseCase: useCases.handleTlsWebhookUseCase,
+      deliveryUseCases: useCases,
     });
 
     try {

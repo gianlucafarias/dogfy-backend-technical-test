@@ -17,9 +17,7 @@ const deliveryUseCases = buildDeliveryUseCases({
 
 const app = buildApp({
   logger: true,
-  createDeliveryUseCase: deliveryUseCases.createDeliveryUseCase,
-  getDeliveryStatusUseCase: deliveryUseCases.getDeliveryStatusUseCase,
-  handleTlsWebhookUseCase: deliveryUseCases.handleTlsWebhookUseCase,
+  deliveryUseCases,
 });
 const nrwPollingJob = new NrwPollingJob({
   useCase: deliveryUseCases.pollNrwDeliveriesUseCase,

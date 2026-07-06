@@ -5,17 +5,21 @@ import {
 } from '../src/application/application-errors.js';
 import type { HandleTlsWebhookResult } from '../src/application/handle-tls-webhook.js';
 import { buildApp } from '../src/app.js';
+import { buildDeliveryUseCases } from '../src/composition-root.js';
 
 describe('POST /webhooks/tls/status', () => {
   it('accepts a TLS webhook status update', async () => {
     const app = buildApp({
-      handleTlsWebhookUseCase: {
-        execute: async (): Promise<HandleTlsWebhookResult> => {
-          return {
-            deliveryId: 'delivery-1',
-            status: 'in_transit',
-            statusUpdatedAt: new Date('2026-07-01T12:00:00.000Z'),
-          };
+      deliveryUseCases: {
+        ...buildDeliveryUseCases(),
+        handleTlsWebhookUseCase: {
+          execute: async (): Promise<HandleTlsWebhookResult> => {
+            return {
+              deliveryId: 'delivery-1',
+              status: 'in_transit',
+              statusUpdatedAt: new Date('2026-07-01T12:00:00.000Z'),
+            };
+          },
         },
       },
     });
@@ -43,9 +47,12 @@ describe('POST /webhooks/tls/status', () => {
 
   it('returns 404 when the TLS delivery does not exist', async () => {
     const app = buildApp({
-      handleTlsWebhookUseCase: {
-        execute: async () => {
-          throw new DeliveryNotFoundError('tls_missing');
+      deliveryUseCases: {
+        ...buildDeliveryUseCases(),
+        handleTlsWebhookUseCase: {
+          execute: async () => {
+            throw new DeliveryNotFoundError('tls_missing');
+          },
         },
       },
     });
@@ -68,9 +75,12 @@ describe('POST /webhooks/tls/status', () => {
 
   it('returns 400 when the TLS status is unknown', async () => {
     const app = buildApp({
-      handleTlsWebhookUseCase: {
-        execute: async () => {
-          throw new InvalidDeliveryInputError('Unsupported TLS status: LOST_IN_HUB');
+      deliveryUseCases: {
+        ...buildDeliveryUseCases(),
+        handleTlsWebhookUseCase: {
+          execute: async () => {
+            throw new InvalidDeliveryInputError('Unsupported TLS status: LOST_IN_HUB');
+          },
         },
       },
     });

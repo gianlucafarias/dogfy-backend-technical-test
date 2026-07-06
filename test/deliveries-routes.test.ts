@@ -4,6 +4,7 @@ import {
   ShippingProviderCreationError,
 } from '../src/application/application-errors.js';
 import { buildApp } from '../src/app.js';
+import { buildDeliveryUseCases } from '../src/composition-root.js';
 import type { ShipmentDetails } from '../src/domain/delivery.js';
 
 describe('POST /deliveries', () => {
@@ -97,9 +98,12 @@ describe('POST /deliveries', () => {
 
   it('maps unavailable providers to 503', async () => {
     const app = buildApp({
-      createDeliveryUseCase: {
-        execute: async () => {
-          throw new NoShippingProvidersAvailableError();
+      deliveryUseCases: {
+        ...buildDeliveryUseCases(),
+        createDeliveryUseCase: {
+          execute: async () => {
+            throw new NoShippingProvidersAvailableError();
+          },
         },
       },
     });
@@ -119,9 +123,12 @@ describe('POST /deliveries', () => {
 
   it('maps provider creation failures to 502', async () => {
     const app = buildApp({
-      createDeliveryUseCase: {
-        execute: async () => {
-          throw new ShippingProviderCreationError();
+      deliveryUseCases: {
+        ...buildDeliveryUseCases(),
+        createDeliveryUseCase: {
+          execute: async () => {
+            throw new ShippingProviderCreationError();
+          },
         },
       },
     });
